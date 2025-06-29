@@ -1,0 +1,67 @@
+body {
+  background: radial-gradient(circle at center, #0a0f1a, #000);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #00ffe7;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.container {
+  max-width: 600px;
+  margin: 50px auto;
+  text-align: center;
+}
+
+h1 {
+  font-size: 3em;
+  letter-spacing: 5px;
+  text-shadow: 0 0 15px #00ffe7;
+}
+
+.tagline {
+  font-size: 1em;
+  color: #66fcf1;
+  margin-bottom: 30px;
+  text-shadow: 0 0 10px #00ffe7;
+}
+
+.chat-box {
+  background: rgba(0, 255, 231, 0.05);
+  border: 1px solid #00ffe7;
+  border-radius: 10px;
+  padding: 20px;
+  height: 300px;
+  overflow-y: auto;
+  box-shadow: 0 0 20px #00ffe7 inset;
+  margin-bottom: 20px;
+}
+
+.bot, .user {
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(0,255,231,0.1);
+  text-align: left;
+}
+
+.bot {
+  border-left: 4px solid #00ffe7;
+}
+
+.user {
+  border-right: 4px solid #00ffe7;
+  text-align: right;
+}
+
+#micBtn {
+  padding: 15px 30px;
+  background: #00ffe7;
+  color: #000;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.2em;
+  box-shadow: 0 0 15px #00ffe7;
+  cursor: pointer;
+}
