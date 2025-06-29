@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>S.P.A.R.K. - AI Assistant</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -12,12 +12,103 @@
     <p class="tagline">Smart Processing Artificial Responsive Knowledgebase</p>
 
     <div class="chat-box" id="chatBox">
-      <div class="bot">Hi, I am <b>S.P.A.R.K.</b>. How can I assist you?</div>
+      <div class="bot">Hi, I am <b>S.P.A.R.K.</b>. Say "Hey Spark" to activate me.</div>
     </div>
 
     <button id="micBtn">🎙️ Speak</button>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+    const micBtn = document.getElementById("micBtn");
+    const chatBox = document.getElementById("chatBox");
+    const OPENAI_API_KEY = "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"; // Replace with your API key
+
+    let isActive = false;
+    let chatHistory = [];
+
+    function speak(text, lang = 'en') {
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = lang;
+      speechSynthesis.speak(utter);
+    }
+
+    function addMessage(type, text) {
+      const div = document.createElement("div");
+      div.className = type;
+      div.textContent = text;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      chatHistory.push({ type, text });
+    }
+
+    async function translate(text, targetLang = 'en') {
+      const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=auto|${targetLang}`);
+      const data = await res.json();
+      return data.responseData.translatedText;
+    }
+
+    async function detectLanguage(text) {
+      const res = await fetch(`https://ws.detectlanguage.com/0.2/detect?q=${encodeURIComponent(text)}&key=demo`);
+      const data = await res.json();
+      return data.data.detections[0].language || 'en';
+    }
+
+    async function getGPTResponse(prompt) {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: prompt }]
+        })
+      });
+      const data = await res.json();
+      return data.choices[0].message.content;
+    }
+
+    function startListening() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.lang = "en-US";
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.start();
+
+      recognition.onresult = async (event) => {
+        const transcript = event.results[0][0].transcript.toLowerCase();
+        console.log("Heard:", transcript);
+
+        if (!isActive && transcript.includes("hey spark")) {
+          isActive = true;
+          speak("Yes, I'm listening.");
+          addMessage("bot", "S.P.A.R.K. activated. How can I help?");
+          return;
+        }
+
+        if (!isActive) return; // ignore until wake word
+
+        addMessage("user", transcript);
+
+        const detectedLang = await detectLanguage(transcript);
+        const translated = await translate(transcript, 'en');
+        const gptReply = await getGPTResponse(translated);
+        const replyTranslated = await translate(gptReply, detectedLang);
+
+        addMessage("bot", replyTranslated);
+        speak(replyTranslated, detectedLang);
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Speech recognition error:", event.error);
+      };
+    }
+
+    micBtn.addEventListener("click", () => {
+      startListening();
+    });
+  </script>
 </body>
 </html>
